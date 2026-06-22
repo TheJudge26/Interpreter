@@ -35,15 +35,39 @@ bool is_operator(char c)
     
 }
 
+bool is_wight_space(char c)
+{
+   return c==' ';
+    
+}
+
 void get_next_token(char *text){
 
     char c = text[current_pos];
 
+    while (is_wight_space(c))
+    {
+        current_pos ++;
+        c = text[current_pos];
+    }
+    
+
     if (is_digit(c))
     {
+        int current_number=c-'0';
+
+        current_pos ++;
+
+        while (is_digit(text[current_pos]))
+        {
+            current_number *= 10;
+            current_number+=(text[current_pos] - '0');  
+            current_pos ++;
+        }
+        
         current_token.type=INT;
 
-        current_token.number_value=c-'0';
+        current_token.number_value=current_number;
         
         current_token.operator_value=' ';
     }
@@ -55,6 +79,8 @@ void get_next_token(char *text){
         current_token.operator_value=c; 
 
         current_token.number_value=0;
+
+        current_pos ++ ;
     }
     else
     {
@@ -63,7 +89,7 @@ void get_next_token(char *text){
         printf("invalid token at pos %d : %c\n",current_pos,c);
         exit(-1);
     }
-    current_pos ++ ;
+    
 }
 
 void token_str(Token token, char *s) // token as string in string s
