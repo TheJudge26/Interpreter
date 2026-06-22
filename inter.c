@@ -14,7 +14,7 @@
 
 typedef struct 
 {
-    int type;//num or op 2+2
+    int type;//num or op 2+2+2
     char operator_value;
     int number_value;
 
