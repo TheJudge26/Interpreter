@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdlib.h>
+#include <string.h>
 
 #define input_len 1000
 
@@ -19,7 +20,7 @@ typedef struct
 
 }Token;
 
-int current_pos=0;
+size_t current_pos=0;
 
 Token current_token;
 
@@ -37,7 +38,7 @@ bool is_operator(char c)
 
 bool is_wight_space(char c)
 {
-   return c==' ';
+   return c==' '|| c == '\n' || c == '\r' || c == '\t';
     
 }
 
@@ -86,7 +87,7 @@ void get_next_token(char *text){
     {
         // current_token.type = err;
         // current_token.number_value=0;
-        printf("invalid token at pos %d : %c\n",current_pos,c);
+        printf("invalid token at pos %ld : %c\n",current_pos,c);
         exit(-1);
     }
     
@@ -114,37 +115,51 @@ void parse(int type){
     {
         char s[100];
         token_str(current_token, s);
-        printf("syntax error at pos %d: Expected token of type %s,but received tosken%s", current_pos,type==INT ? INT_STR : OPERATOR_STRING,s);
+        printf("syntax error at pos %ld: Expected token of type %s,but received tosken%s", current_pos,type==INT ? INT_STR : OPERATOR_STRING,s);
         exit(-1);
     }
     
 }
 
-int interpret(char *text)//from the text to tokens 
+
+int interpret(char *text) 
 {
-    get_next_token(text);
-    parse(INT);
-    int left = current_token.number_value;
-
-    get_next_token(text);
-    parse(OP);
-    int operator = current_token.operator_value;
-
-    get_next_token(text);
-    parse(INT);
-    int right = current_token.number_value;
-
-    current_pos=0;
-
     int result;
+    get_next_token(text);
+    parse(INT);
+    result = current_token.number_value;
 
-    if (operator=='+')
+    
+    while (is_wight_space(text[current_pos])) 
     {
-        result = left + right;
+        current_pos++;
     }
-    else{
-        result=left-right;
-    }
+
+    while (text[current_pos] != '\0')
+    {
+        get_next_token(text);
+        parse(OP);
+        int operator = current_token.operator_value;
+
+        get_next_token(text);
+        parse(INT);
+        int operand = current_token.number_value;
+
+        if (operator == '+')
+        {
+            result += operand;
+        }
+        else
+        {
+            result -= operand;
+        }
+
+        
+        while (is_wight_space(text[current_pos])) 
+        {
+            current_pos++;
+        }
+    }  
     return result;
 }
 int main() {
@@ -155,6 +170,9 @@ printf("Interpreter is running......");
 int result;
 while (true)
 {
+
+     current_pos=0;
+     
     printf(">>>");
 
     fgets(s,input_len,stdin);
